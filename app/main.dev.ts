@@ -18,6 +18,10 @@ const db: Knex = Knex({
   useNullAsDefault: true,
 });
 
+db.migrate.latest({
+  directory: path.join(RESOURCES_PATH, 'migrations'),
+});
+
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
