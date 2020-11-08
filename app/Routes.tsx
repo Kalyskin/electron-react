@@ -5,6 +5,7 @@ import { Switch, Route } from 'react-router-dom';
 import routes from './constants/routes.json';
 import App from './containers/App';
 import HomePage from './containers/HomePage';
+import CategoryPage from './containers/CategoryPage';
 import QuizAdminPage from './containers/QuizAdminPage';
 
 export default function Routes() {
@@ -12,6 +13,7 @@ export default function Routes() {
     <App>
       <Switch>
         <Route exact path={routes.HOME} component={HomePage} />
+        <Route exact path={routes.CATEGORY} component={CategoryPage} />
         <Route exact path={routes.QUIZ_ADMIN} component={QuizAdminPage} />
       </Switch>
     </App>

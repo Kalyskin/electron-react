@@ -15,6 +15,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import IconButton from '@material-ui/core/IconButton';
 import { useHistory } from 'react-router';
 import { kppList, rankList } from '../constants';
+import routes from '../constants/routes.json';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -67,7 +68,11 @@ const Home = () => {
     setKpp(event.target.value);
   };
   const handleSettingsClick = () => {
-    history.push('/quiz-admin');
+    history.push(routes.QUIZ_ADMIN);
+  };
+
+  const handleStartClick = () => {
+    history.push(routes.CATEGORY);
   };
 
   const errorCallback = (error: any) => {
@@ -179,7 +184,11 @@ const Home = () => {
           </Select>
         </FormControl>
         <FormControl variant="filled" className={classes.formControl}>
-          <Button variant="contained" color="primary">
+          <Button
+            onClick={handleStartClick}
+            variant="contained"
+            color="primary"
+          >
             Начать
           </Button>
         </FormControl>

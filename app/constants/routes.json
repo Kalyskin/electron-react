@@ -1,5 +1,6 @@
 {
   "HOME": "/",
+  "CATEGORY": "/category",
   "COUNTER": "/counter",
   "QUIZ_ADMIN": "/quiz-admin"
 }
