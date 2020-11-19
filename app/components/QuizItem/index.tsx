@@ -11,6 +11,8 @@ import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import Grid from '@material-ui/core/Grid';
 import { useQuiz } from '../../hooks/quiz';
+import { useRouter } from '../../hooks/router';
+import routes from '../../constants/routes.json';
 
 const useStyles = makeStyles((theme) => ({
   list: {
@@ -19,25 +21,52 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     flexGrow: 1,
   },
-
   bottomNav: {
     paddingTop: theme.spacing(2),
   },
+  backWrap: {
+    width: '100%',
+    textAlign: 'center',
+    padding: theme.spacing(2),
+  },
 }));
+
+const buildResultPageUrl = (userId: number, category: string) => {
+  return routes.RESULT.replace(':userId', String(userId)).replace(
+    ':categoryId',
+    category
+  );
+};
 
 export default function QuizItem() {
   const classes = useStyles();
+  const { navigate } = useRouter();
   const {
     currentQuiz,
+    currentSession,
     nextQuestion,
     prevQuestion,
     isCheckedOption,
     toggleOption,
+    hasNext,
+    hasPrev,
+    saveAnswers,
   } = useQuiz();
+
+  const handleFinish = async () => {
+    await saveAnswers();
+    navigate(
+      buildResultPageUrl(currentSession.userId, currentSession.category)
+    );
+  };
+
+  const goToCategories = () => {
+    navigate(routes.CATEGORY.replace(':userId', String(currentSession.userId)));
+  };
 
   return (
     <Paper className={classes.paper}>
-      {currentQuiz && (
+      {currentQuiz ? (
         <List className={classes.list}>
           <ListItem>
             <b>Вопрос:</b>
@@ -77,6 +106,7 @@ export default function QuizItem() {
             >
               <Grid item>
                 <Button
+                  disabled={!hasPrev()}
                   onClick={prevQuestion}
                   variant="contained"
                   color="primary"
@@ -86,18 +116,41 @@ export default function QuizItem() {
                 </Button>
               </Grid>
               <Grid item>
-                <Button
-                  onClick={nextQuestion}
-                  variant="contained"
-                  color="primary"
-                  endIcon={<NavigateNextIcon />}
-                >
-                  следующий
-                </Button>
+                {hasNext() ? (
+                  <Button
+                    onClick={nextQuestion}
+                    variant="contained"
+                    color="primary"
+                    endIcon={<NavigateNextIcon />}
+                  >
+                    следующий
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleFinish}
+                    variant="contained"
+                    color="primary"
+                    endIcon={<NavigateNextIcon />}
+                  >
+                    Завершить
+                  </Button>
+                )}
               </Grid>
             </Grid>
           </ListItem>
         </List>
+      ) : (
+        <div className={classes.backWrap}>
+          <h2>Нет вопросов</h2>
+          <Button
+            onClick={goToCategories}
+            variant="contained"
+            color="primary"
+            startIcon={<NavigateBeforeIcon />}
+          >
+            Назад
+          </Button>
+        </div>
       )}
     </Paper>
   );

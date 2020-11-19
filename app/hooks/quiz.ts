@@ -1,18 +1,22 @@
 import { useRecoilState, useRecoilValue } from 'recoil';
 import {
   currentQuestionIndexState,
+  currentSessionState,
   questionsState,
 } from '../recoil/selectors/questionsState';
 import { answersState } from '../recoil/atoms/answersState';
-import { QuizAnswerEntity } from '../electron/quiz/quiz.entity';
+import { QuizAnswerEntity, QuizEntity } from '../electron/quiz/quiz.entity';
+import { ipcRequest } from '../utils/ipcRenderer';
 
 export const useQuiz = () => {
   const questions = useRecoilValue(questionsState);
+  const currentSession = useRecoilValue(currentSessionState);
   const [quizIndex, setQuizIndex] = useRecoilState(currentQuestionIndexState);
   const [answers, setAnswersState] = useRecoilState(answersState);
   const currentQuiz = questions[quizIndex] || null;
-  const answer: QuizAnswerEntity = answers[currentQuiz.id] || {
-    questionId: currentQuiz.id,
+  const answer: QuizAnswerEntity = (currentQuiz && answers[currentQuiz.id]) || {
+    userId: currentSession.userId,
+    questionId: (currentQuiz && currentQuiz.id) || 0,
     checkedOptions: [],
   };
 
@@ -39,25 +43,46 @@ export const useQuiz = () => {
     });
   };
 
+  const hasNext = () => quizIndex + 1 < questions.length;
+  const hasPrev = () => quizIndex > 0;
+
   const nextQuestion = () => {
-    if (quizIndex + 1 < questions.length) {
+    if (hasNext()) {
       setQuizIndex(quizIndex + 1);
+      setAnswersState({
+        ...answers,
+        [currentQuiz.id]: answer,
+      });
     }
   };
 
   const prevQuestion = () => {
-    if (quizIndex > 0) {
+    if (hasPrev()) {
       setQuizIndex(quizIndex - 1);
     }
   };
 
-  console.log('answer', answer);
+  const saveAnswers = async () => {
+    const answersLocal = {
+      ...answers,
+      [currentQuiz.id]: answer,
+    };
+    setAnswersState(answersLocal);
+    await ipcRequest<QuizEntity[]>(
+      'quiz/save-answers',
+      Object.values(answersLocal)
+    );
+  };
 
   return {
+    hasPrev,
+    hasNext,
     toggleOption,
     nextQuestion,
     prevQuestion,
     isCheckedOption,
+    saveAnswers,
     currentQuiz,
+    currentSession,
   };
 };

@@ -5,6 +5,7 @@ export interface QuizOption {
 export enum QuizCategory {
   PT = 'PD',
   DTC = 'DTC',
+  NONE = 'NONE',
 }
 
 export interface QuizEntity {
@@ -23,6 +24,7 @@ export interface UserEntity {
 }
 
 export interface QuizAnswerEntity {
+  userId: number;
   questionId: number;
   checkedOptions: string[];
 }
@@ -36,4 +38,12 @@ export type UserDto = Omit<UserEntity, 'id' | 'image'>;
 export interface CreateUserDto {
   imageData: string;
   userDto: UserDto;
+}
+
+export interface ResultDto {
+  user: UserEntity;
+  category: QuizCategory;
+  point: number;
+  totalPoint: number;
+  percent: number;
 }

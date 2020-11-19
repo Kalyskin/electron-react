@@ -1,6 +1,7 @@
 import {
   CreateQuizEntity,
   CreateUserDto,
+  QuizAnswerEntity,
   QuizCategory,
   UpdateQuizEntity,
 } from './quiz.entity';
@@ -34,5 +35,15 @@ export class QuizController {
   @IpcRequest('/update-question')
   async updateQuestion({ id, dto }: { id: number; dto: UpdateQuizEntity }) {
     await this.quizService.updateQuiz(id, dto);
+  }
+
+  @IpcRequest('/save-answers')
+  async saveAnswers(answers: QuizAnswerEntity[]) {
+    await this.quizService.createAnswers(answers);
+  }
+
+  @IpcRequest('/result')
+  result({ userId, category }: { userId: number; category: QuizCategory }) {
+    return this.quizService.getResult(userId, category);
   }
 }

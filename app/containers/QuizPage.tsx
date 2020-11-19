@@ -12,7 +12,7 @@ import { useSetRecoilState } from 'recoil';
 import { QuizCategory } from '../electron/quiz/quiz.entity';
 import { useRouter } from '../hooks/router';
 import { categoryTitle } from '../utils/category';
-import { currentCategoryState } from '../recoil/selectors/questionsState';
+import { currentSessionState } from '../recoil/selectors/questionsState';
 import QuizItem from '../components/QuizItem';
 
 const useStyles = makeStyles((theme) => ({
@@ -42,15 +42,18 @@ const useStyles = makeStyles((theme) => ({
 export default function QuizPage() {
   const classes = useStyles();
   const { goBack } = useRouter();
-  const { categoryId } = useParams<{
+  const { categoryId, userId } = useParams<{
     categoryId: QuizCategory;
     userId: string;
   }>();
-  const setCurrentCategory = useSetRecoilState(currentCategoryState);
+  const setCurrentSession = useSetRecoilState(currentSessionState);
 
   useEffect(() => {
-    setCurrentCategory(categoryId);
-  }, [categoryId, setCurrentCategory]);
+    setCurrentSession({
+      category: categoryId,
+      userId: Number(userId),
+    });
+  }, [categoryId, userId, setCurrentSession]);
 
   return (
     <div className={classes.root}>

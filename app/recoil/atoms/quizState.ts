@@ -5,7 +5,7 @@ export const quizState = atom<QuizEntity>({
   key: 'quizState',
   default: {
     id: 0,
-    category: QuizCategory.PT,
+    category: QuizCategory.NONE,
     question: '',
     options: [],
   },

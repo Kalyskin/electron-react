@@ -8,7 +8,7 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { InputLabel, MenuItem, Select } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -18,12 +18,13 @@ import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ListSubheader from '@material-ui/core/ListSubheader';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { QuizCategory } from '../../electron/quiz/quiz.entity';
 import { quizState } from '../../recoil/atoms/quizState';
 import { ipcRequest } from '../../utils/ipcRenderer';
 import { quizFormModalState } from '../../recoil/atoms/quizFormModalState';
 import { categoryTitle } from '../../utils/category';
+import { quizzesState } from '../../recoil/atoms/quizzesState';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -42,27 +43,29 @@ export function QuizFormModal() {
   const classes = useStyles();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [quiz, setQuiz] = useRecoilState(quizState);
+  const quizzes = useRecoilValue(quizzesState);
   const [{ open, edit }, setFormModalState] = useRecoilState(
     quizFormModalState
   );
 
   const onClose = () => {
-    setFormModalState({ open: false, edit: false, editId: -1 });
+    setFormModalState({ open: false, edit: false });
   };
   const resetQuizState = () =>
     setQuiz({
       id: 0,
-      category: QuizCategory.PT,
+      category: QuizCategory.NONE,
       question: '',
       options: [],
     });
 
-  const handleChangeCategory = (e: any) => {
-    setQuiz({ ...quiz, category: e.target.value });
-  };
-
   const handleSave = () => {
-    const { id, ...dto } = quiz;
+    const { id, options, question } = quiz;
+    const dto = {
+      category: quizzes.category,
+      options,
+      question,
+    };
     if (edit) {
       ipcRequest('quiz/update-question', { id, dto })
         .then(() => {
@@ -150,21 +153,7 @@ export function QuizFormModal() {
       <DialogContent>
         <Grid container spacing={3}>
           <Grid item xs={12} md={12}>
-            <InputLabel id="category-label">Категория</InputLabel>
-            <Select
-              fullWidth
-              labelId="category-label"
-              id="kpp-select"
-              value={quiz.category}
-              onChange={handleChangeCategory}
-            >
-              <MenuItem value={QuizCategory.PT}>
-                {categoryTitle(QuizCategory.PT)}
-              </MenuItem>
-              <MenuItem value={QuizCategory.DTC}>
-                {categoryTitle(QuizCategory.DTC)}
-              </MenuItem>
-            </Select>
+            <Typography>{categoryTitle(quizzes.category)}</Typography>
           </Grid>
           <Grid item xs={12} md={12}>
             <TextField

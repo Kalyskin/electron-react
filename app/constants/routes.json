@@ -4,5 +4,6 @@
   "COUNTER": "/counter",
   "QUIZ_ADMIN": "/quiz-admin",
   "QUIZ": "/quiz/:categoryId/:userId",
+  "RESULT": "/result/:categoryId/:userId",
   "IDENTIFICATION": "/identification"
 }

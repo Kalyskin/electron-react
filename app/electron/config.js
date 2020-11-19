@@ -11,7 +11,12 @@ export const SQLITE_FILE = app.isPackaged
   : path.join(RESOURCES_PATH, 'db.sqlite');
 
 export const USER_IMAGES_PATH = path.join(app.getPath('userData'), 'images');
+export const USER_DOCS_PATH = path.join(app.getPath('userData'), 'docs');
 
 if (!fs.existsSync(USER_IMAGES_PATH)) {
   fs.mkdirSync(USER_IMAGES_PATH);
+}
+
+if (!fs.existsSync(USER_DOCS_PATH)) {
+  fs.mkdirSync(USER_DOCS_PATH);
 }

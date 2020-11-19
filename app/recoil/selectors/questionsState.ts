@@ -3,9 +3,17 @@ import { QuizCategory, QuizEntity } from '../../electron/quiz/quiz.entity';
 import { ipcRequest } from '../../utils/ipcRenderer';
 import { shuffle } from '../../utils/array';
 
-export const currentCategoryState = atom<QuizCategory | null>({
-  key: 'currentCategoryState',
-  default: null,
+export interface CurrentSessionState {
+  category: QuizCategory;
+  userId: number;
+}
+
+export const currentSessionState = atom<CurrentSessionState>({
+  key: 'currentSessionState',
+  default: {
+    category: QuizCategory.NONE,
+    userId: 0,
+  },
 });
 
 export const currentQuestionIndexState = atom<number>({
@@ -16,15 +24,13 @@ export const currentQuestionIndexState = atom<number>({
 export const questionsState = selector<QuizEntity[]>({
   key: 'questionsState',
   get: async ({ get }) => {
-    const currentCategory = get(currentCategoryState);
-    if (currentCategory) {
-      const questions = await ipcRequest<QuizEntity[]>(
-        'quiz/find-by-category',
-        currentCategory
-      );
-      return shuffle<QuizEntity>(questions);
-    }
-    return [];
+    const currentSession = get(currentSessionState);
+    if (currentSession.category === QuizCategory.NONE) return [];
+    const questions = await ipcRequest<QuizEntity[]>(
+      'quiz/find-by-category',
+      currentSession.category
+    );
+    return shuffle<QuizEntity>(questions);
   },
 });
 

@@ -7,6 +7,11 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import React from 'react';
+import { MenuItem, Select } from '@material-ui/core';
+import { useRecoilState } from 'recoil';
+import { QuizCategory } from '../../../electron/quiz/quiz.entity';
+import { categoryTitle } from '../../../utils/category';
+import { quizzesState } from '../../../recoil/atoms/quizzesState';
 
 const useToolbarStyles = makeStyles((theme) => ({
   root: {
@@ -26,6 +31,11 @@ interface QuizTableToolbarProps {
 export const QuizTableToolbar = (props: QuizTableToolbarProps) => {
   const classes = useToolbarStyles();
   const { onAddQuestion, onExit } = props;
+  const [quizzes, setQuizzesState] = useRecoilState(quizzesState);
+
+  const handleChangeCategory = (e: any) => {
+    setQuizzesState({ ...quizzes, category: e.target.value });
+  };
 
   return (
     <Toolbar className={clsx(classes.root)}>
@@ -42,7 +52,20 @@ export const QuizTableToolbar = (props: QuizTableToolbarProps) => {
       >
         Вопросы
       </Typography>
-
+      <Select
+        fullWidth
+        labelId="category-label"
+        id="kpp-select"
+        value={quizzes.category}
+        onChange={handleChangeCategory}
+      >
+        <MenuItem value={QuizCategory.PT}>
+          {categoryTitle(QuizCategory.PT)}
+        </MenuItem>
+        <MenuItem value={QuizCategory.DTC}>
+          {categoryTitle(QuizCategory.DTC)}
+        </MenuItem>
+      </Select>
       <Tooltip title="Добавить вопрос">
         <IconButton onClick={onAddQuestion} aria-label="delete">
           <AddIcon />
