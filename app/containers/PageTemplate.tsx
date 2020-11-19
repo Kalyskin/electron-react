@@ -18,7 +18,7 @@ type Props = {
   children: ReactNode;
 };
 
-export default function App(props: Props) {
+export default function PageTemplate(props: Props) {
   const { children } = props;
   const classes = useStyles();
 

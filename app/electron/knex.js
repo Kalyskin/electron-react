@@ -8,7 +8,7 @@ const knexConfig = {
   useNullAsDefault: true,
   migrations: {
     tableName: 'migrations',
-    directory: path.join(__dirname, 'migrations'),
+    directory: path.join(__dirname, '../../resources/migrations'),
   },
   seeds: {
     directory: path.join(__dirname, 'seeds'),

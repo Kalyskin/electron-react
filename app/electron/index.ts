@@ -24,6 +24,7 @@ export default function startApp(db: Knex) {
 
     routes.forEach((route) => {
       const channel = `${prefix}${route.path}`;
+      ipcMain.removeAllListeners(`${channel}-message`);
       ipcMain.on(`${channel}-message`, (event, data) => {
         const result = instance[route.methodName](JSON.parse(data));
 
@@ -31,7 +32,7 @@ export default function startApp(db: Knex) {
           result
             .then((res: never) => {
               console.log(`${channel}-reply`, JSON.stringify(res));
-              event.reply(`${channel}-reply`, JSON.stringify(res));
+              event.reply(`${channel}-reply`, JSON.stringify(res || 'ok'));
               return res;
             })
             .catch((error) => {

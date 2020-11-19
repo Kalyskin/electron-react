@@ -23,6 +23,7 @@ import { QuizCategory } from '../../electron/quiz/quiz.entity';
 import { quizState } from '../../recoil/atoms/quizState';
 import { ipcRequest } from '../../utils/ipcRenderer';
 import { quizFormModalState } from '../../recoil/atoms/quizFormModalState';
+import { categoryTitle } from '../../utils/category';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -41,10 +42,12 @@ export function QuizFormModal() {
   const classes = useStyles();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [quiz, setQuiz] = useRecoilState(quizState);
-  const [{ open }, setFormModalState] = useRecoilState(quizFormModalState);
+  const [{ open, edit }, setFormModalState] = useRecoilState(
+    quizFormModalState
+  );
 
   const onClose = () => {
-    setFormModalState({ open: false });
+    setFormModalState({ open: false, edit: false, editId: -1 });
   };
   const resetQuizState = () =>
     setQuiz({
@@ -59,17 +62,28 @@ export function QuizFormModal() {
   };
 
   const handleSave = () => {
-    const { id, ...createEntity } = quiz;
-    ipcRequest('quiz/create', createEntity)
-      .then((_: any) => {
-        resetQuizState();
-        onClose();
-        return null;
-      })
-      .catch((error) => {
-        console.log('ipcRequest error quiz/create', error);
-        onClose();
-      });
+    const { id, ...dto } = quiz;
+    if (edit) {
+      ipcRequest('quiz/update-question', { id, dto })
+        .then(() => {
+          resetQuizState();
+          onClose();
+          return null;
+        })
+        .catch(() => {
+          onClose();
+        });
+    } else {
+      ipcRequest('quiz/create', dto)
+        .then(() => {
+          resetQuizState();
+          onClose();
+          return null;
+        })
+        .catch(() => {
+          onClose();
+        });
+    }
   };
 
   const handleCancel = () => {
@@ -144,8 +158,12 @@ export function QuizFormModal() {
               value={quiz.category}
               onChange={handleChangeCategory}
             >
-              <MenuItem value={QuizCategory.PT}>{QuizCategory.PT}</MenuItem>
-              <MenuItem value={QuizCategory.DTC}>{QuizCategory.DTC}</MenuItem>
+              <MenuItem value={QuizCategory.PT}>
+                {categoryTitle(QuizCategory.PT)}
+              </MenuItem>
+              <MenuItem value={QuizCategory.DTC}>
+                {categoryTitle(QuizCategory.DTC)}
+              </MenuItem>
             </Select>
           </Grid>
           <Grid item xs={12} md={12}>

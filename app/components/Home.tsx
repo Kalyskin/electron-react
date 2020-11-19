@@ -13,9 +13,11 @@ import {
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import SettingsIcon from '@material-ui/icons/Settings';
 import IconButton from '@material-ui/core/IconButton';
-import { useHistory } from 'react-router';
 import { kppList, rankList } from '../constants';
 import routes from '../constants/routes.json';
+import { useRouter } from '../hooks/router';
+import { ipcRequest } from '../utils/ipcRenderer';
+import { UserDto } from '../electron/quiz/quiz.entity';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -55,10 +57,15 @@ const scale = (width, height, maxWidth, maxHeight) => {
 };
 
 const Home = () => {
-  const history = useHistory();
+  const { navigate } = useRouter();
   const classes = useStyles();
   const [rank, setRank] = useState('');
   const [kpp, setKpp] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [{ width, height }, setSizeCanvas] = useState({
+    width: 0,
+    height: 0,
+  });
   const videoRef = useRef<HTMLVideoElement>();
   const canvasRef = useRef<HTMLCanvasElement>();
   const handleChangeRank = (event: any) => {
@@ -68,11 +75,27 @@ const Home = () => {
     setKpp(event.target.value);
   };
   const handleSettingsClick = () => {
-    history.push(routes.QUIZ_ADMIN);
+    navigate(routes.QUIZ_ADMIN);
+  };
+  const handleInputFullName = (e: any) => {
+    setFullName(e.target.value);
   };
 
-  const handleStartClick = () => {
-    history.push(routes.CATEGORY);
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    if (canvasRef.current) {
+      const userDto: UserDto = {
+        full_name: fullName,
+        kpp,
+        rank,
+      };
+      const imageData = canvasRef.current.toDataURL('image/png');
+      const userId = await ipcRequest<number>('quiz/create-user', {
+        imageData,
+        userDto,
+      });
+      navigate(routes.CATEGORY.replace(':userId', String(userId)));
+    }
   };
 
   const errorCallback = (error: any) => {
@@ -87,6 +110,16 @@ const Home = () => {
         if (videoRef.current) {
           videoRef.current.srcObject = localMediaStream;
           videoRef.current.autoplay = true;
+          videoRef.current.onloadedmetadata = () => {
+            setSizeCanvas(
+              scale(
+                videoRef.current?.videoWidth || 0,
+                videoRef.current?.videoHeight || 0,
+                200,
+                200
+              )
+            );
+          };
         }
       },
       errorCallback
@@ -95,28 +128,13 @@ const Home = () => {
 
   const takePhoto = () => {
     if (canvasRef.current && videoRef.current) {
-      const { width, height } = scale(
-        videoRef.current.videoWidth,
-        videoRef.current.videoHeight,
-        200,
-        200
-      );
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       canvasRef.current
         .getContext('2d')
         .drawImage(videoRef.current, 0, 0, width, height);
-      // const photoData = canvasRef.current
-      //   .toDataURL('image/png')
-      //   .replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
     }
   };
-  const { width, height } = scale(
-    videoRef.current?.videoWidth || 0,
-    videoRef.current?.videoHeight || 0,
-    200,
-    200
-  );
 
   return (
     <Container maxWidth="sm">
@@ -128,7 +146,7 @@ const Home = () => {
       >
         <SettingsIcon />
       </IconButton>
-      <form className={classes.form} noValidate autoComplete="off">
+      <form className={classes.form} onSubmit={handleSubmit} autoComplete="off">
         <FormControl className={classes.formControl}>
           <Paper className={classes.photo}>
             {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
@@ -147,15 +165,25 @@ const Home = () => {
           <canvas ref={canvasRef} width={width} height={height} />
         </FormControl>
         <FormControl className={classes.formControl}>
-          <TextField fullWidth id="fio" label="Ф.И.О" variant="outlined" />
+          <TextField
+            value={fullName}
+            onInput={handleInputFullName}
+            required
+            fullWidth
+            id="fio"
+            label="Ф.И.О"
+            variant="outlined"
+          />
         </FormControl>
         <FormControl variant="filled" className={classes.formControl}>
           <InputLabel id="rank-label">Звания</InputLabel>
           <Select
+            required
             fullWidth
             labelId="rank-label"
             id="rank-select"
             value={rank}
+            name="rank"
             onChange={handleChangeRank}
           >
             {rankList.map((item, i) => (
@@ -169,10 +197,12 @@ const Home = () => {
         <FormControl variant="filled" className={classes.formControl}>
           <InputLabel id="kpp-label">КПП</InputLabel>
           <Select
+            required
             fullWidth
             labelId="kpp-label"
             id="kpp-select"
             value={kpp}
+            name="kpp"
             onChange={handleChangeKpp}
           >
             {kppList.map((item, i) => (
@@ -184,11 +214,7 @@ const Home = () => {
           </Select>
         </FormControl>
         <FormControl variant="filled" className={classes.formControl}>
-          <Button
-            onClick={handleStartClick}
-            variant="contained"
-            color="primary"
-          >
+          <Button type="submit" variant="contained" color="primary">
             Начать
           </Button>
         </FormControl>

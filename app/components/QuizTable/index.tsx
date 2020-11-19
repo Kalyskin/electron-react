@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -7,15 +7,19 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import Checkbox from '@material-ui/core/Checkbox';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import { useHistory } from 'react-router';
+import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Delete';
+import IconButton from '@material-ui/core/IconButton';
 import { QuizTableToolbar } from './QuizToolbar';
 import { QuizTableHead } from './QuizTableHead';
 import { quizzesState } from '../../recoil/atoms/quizzesState';
 import { ipcRequest } from '../../utils/ipcRenderer';
 import { QuizEntity } from '../../electron/quiz/quiz.entity';
 import { quizFormModalState } from '../../recoil/atoms/quizFormModalState';
+import { DeleteModal } from './DeleteModal';
+import { quizState } from '../../recoil/atoms/quizState';
 
 const headCells = [
   {
@@ -35,6 +39,12 @@ const headCells = [
     numeric: false,
     disablePadding: false,
     label: 'Вопрос',
+  },
+  {
+    id: 'actions',
+    numeric: false,
+    disablePadding: false,
+    label: '',
   },
 ];
 
@@ -67,53 +77,30 @@ export default function QuizTable() {
   const history = useHistory();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+  const [deleteId, setDeleteId] = React.useState(-1);
 
+  const setQuizState = useSetRecoilState(quizState);
   const [quizzes, setQuizzesState] = useRecoilState(quizzesState);
   const [{ open: isOpenFormModal }, setFormModalState] = useRecoilState(
     quizFormModalState
   );
 
+  const fetchQuestions = useCallback(() => {
+    ipcRequest('quiz/find-by-category', quizzes.category)
+      .then((items: QuizEntity[]) => {
+        setQuizzesState({ ...quizzes, items });
+        return null;
+      })
+      .catch(console.error);
+  }, [quizzes, setQuizzesState]);
+
   useEffect(() => {
     if (!isOpenFormModal) {
-      ipcRequest('quiz/find-by-category', quizzes.category)
-        .then((items: QuizEntity[]) => {
-          setQuizzesState({ ...quizzes, items });
-          return null;
-        })
-        .catch((error) => {
-          console.error('ipcRequest error quiz/create', error);
-        });
+      fetchQuestions();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quizzes.page, quizzes.category, isOpenFormModal, setQuizzesState]);
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const selectedIds = quizzes.items.map((n) => n.id);
-      setQuizzesState({ ...quizzes, selectedIds });
-      return;
-    }
-    setQuizzesState({ ...quizzes, selectedIds: [] });
-  };
-
-  const handleClick = (_: any, id: number) => {
-    const selectedIndex = quizzes.selectedIds.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(quizzes.selectedIds, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(quizzes.selectedIds.slice(1));
-    } else if (selectedIndex === quizzes.selectedIds.length - 1) {
-      newSelected = newSelected.concat(quizzes.selectedIds.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        quizzes.selectedIds.slice(0, selectedIndex),
-        quizzes.selectedIds.slice(selectedIndex + 1)
-      );
-    }
-    setQuizzesState({ ...quizzes, selectedIds: newSelected });
-  };
+  }, [quizzes.page, quizzes.category, isOpenFormModal]);
 
   const handleChangePage = (_: any, newPage) => {
     setPage(newPage);
@@ -124,14 +111,34 @@ export default function QuizTable() {
     setPage(0);
   };
 
-  const handleAddQuestion = () => setFormModalState({ open: true });
-  const handleRemoveQuestions = () => {};
-  const handleExit = () => {
-    history.push('/');
+  const handleAddQuestion = () =>
+    setFormModalState({ open: true, edit: false });
+
+  const handleRemoveQuestion = (id: number) => {
+    setDeleteId(id);
+    setOpenDeleteDialog(true);
+  };
+  const handleEditQuestion = (id: number) => {
+    const question = quizzes.items.find((q) => q.id === id);
+    if (question) {
+      setFormModalState({ open: true, edit: true });
+      setQuizState(question);
+    }
   };
 
-  const isSelected = (id: number) => {
-    return quizzes.selectedIds.indexOf(id) !== -1;
+  const handleConfirmDelete = () => {
+    ipcRequest('quiz/delete-question', deleteId)
+      .then(() => {
+        setOpenDeleteDialog(false);
+        fetchQuestions();
+        return null;
+      })
+      .catch(() => {
+        setOpenDeleteDialog(false);
+      });
+  };
+  const handleExit = () => {
+    history.push('/');
   };
 
   const emptyRows =
@@ -142,10 +149,8 @@ export default function QuizTable() {
     <div className={classes.root}>
       <Paper className={classes.paper}>
         <QuizTableToolbar
-          numSelected={quizzes.selectedIds.length}
           onExit={handleExit}
           onAddQuestion={handleAddQuestion}
-          onRemoveQuestions={handleRemoveQuestions}
         />
         <TableContainer>
           <Table
@@ -154,33 +159,13 @@ export default function QuizTable() {
             size="medium"
             aria-label="enhanced table"
           >
-            <QuizTableHead
-              headCells={headCells}
-              numSelected={quizzes.selectedIds.length}
-              onSelectAllClick={handleSelectAllClick}
-              rowCount={quizzes.items.length}
-            />
+            <QuizTableHead headCells={headCells} />
             <TableBody>
               {quizzes.items.map((row, index) => {
-                const isItemSelected = isSelected(row.id);
                 const labelId = `quizzes-table-checkbox-${index}`;
 
                 return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={isItemSelected}
-                        inputProps={{ 'aria-labelledby': labelId }}
-                      />
-                    </TableCell>
+                  <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                     <TableCell
                       align="right"
                       component="th"
@@ -192,6 +177,20 @@ export default function QuizTable() {
                     </TableCell>
                     <TableCell align="left">{row.category}</TableCell>
                     <TableCell align="left">{row.question}</TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        onClick={() => handleEditQuestion(row.id)}
+                        aria-label="edit"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleRemoveQuestion(row.id)}
+                        aria-label="delete"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -213,6 +212,11 @@ export default function QuizTable() {
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Paper>
+      <DeleteModal
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        onDelete={handleConfirmDelete}
+      />
     </div>
   );
 }

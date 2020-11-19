@@ -6,7 +6,6 @@ interface QuizzesState {
   category: QuizCategory;
   page: number;
   loading: boolean;
-  selectedIds: number[];
   rowsPerPage: number;
 }
 
@@ -17,7 +16,6 @@ export const quizzesState = atom<QuizzesState>({
     category: QuizCategory.PT,
     page: 1,
     loading: false,
-    selectedIds: [],
     rowsPerPage: 10,
   },
 });

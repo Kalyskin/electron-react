@@ -1,6 +1,8 @@
 {
   "HOME": "/",
-  "CATEGORY": "/category",
+  "CATEGORY": "/category/:userId",
   "COUNTER": "/counter",
-  "QUIZ_ADMIN": "/quiz-admin"
+  "QUIZ_ADMIN": "/quiz-admin",
+  "QUIZ": "/quiz/:categoryId/:userId",
+  "IDENTIFICATION": "/identification"
 }

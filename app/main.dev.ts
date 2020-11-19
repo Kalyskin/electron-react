@@ -19,6 +19,7 @@ const db: Knex = Knex({
 });
 
 db.migrate.latest({
+  database: 'migrations',
   directory: path.join(RESOURCES_PATH, 'migrations'),
 });
 
