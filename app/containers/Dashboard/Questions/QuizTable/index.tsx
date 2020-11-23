@@ -14,12 +14,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
 import { QuizTableToolbar } from './QuizToolbar';
 import { QuizTableHead } from './QuizTableHead';
-import { quizzesState } from '../../recoil/atoms/quizzesState';
-import { ipcRequest } from '../../utils/ipcRenderer';
-import { QuizEntity } from '../../electron/quiz/quiz.entity';
-import { quizFormModalState } from '../../recoil/atoms/quizFormModalState';
+import { quizzesState } from '../../../../recoil/atoms/quizzesState';
+import { ipcRequest } from '../../../../utils/ipcRenderer';
+import { QuizEntity } from '../../../../electron/quiz/quiz.entity';
+import { quizFormModalState } from '../../../../recoil/atoms/quizFormModalState';
 import { DeleteModal } from './DeleteModal';
-import { quizState } from '../../recoil/atoms/quizState';
+import { quizState } from '../../../../recoil/atoms/quizState';
+import { QuizFormModal } from './QuizFormModal';
 
 const headCells = [
   {
@@ -217,6 +218,7 @@ export default function QuizTable() {
         onClose={() => setOpenDeleteDialog(false)}
         onDelete={handleConfirmDelete}
       />
+      <QuizFormModal />
     </div>
   );
 }

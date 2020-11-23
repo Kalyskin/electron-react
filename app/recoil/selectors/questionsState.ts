@@ -27,10 +27,30 @@ export const questionsState = selector<QuizEntity[]>({
     const currentSession = get(currentSessionState);
     if (currentSession.category === QuizCategory.NONE) return [];
     const questions = await ipcRequest<QuizEntity[]>(
-      'quiz/find-by-category',
+      'quiz/get-by-category',
       currentSession.category
     );
     return shuffle<QuizEntity>(questions);
+  },
+});
+
+interface QuizSettingsState {
+  questionCount: number;
+  minutes: number;
+}
+export const quizSettingsState = selector<QuizSettingsState>({
+  key: 'quizSettingsState',
+  get: async ({ get }) => {
+    const currentSession = get(currentSessionState);
+    if (currentSession.category === QuizCategory.NONE)
+      return {
+        questionCount: 0,
+        minutes: 0,
+      };
+    return ipcRequest<QuizSettingsState>(
+      'quiz/category-settings',
+      currentSession.category
+    );
   },
 });
 

@@ -5,5 +5,10 @@
   "QUIZ_ADMIN": "/quiz-admin",
   "QUIZ": "/quiz/:categoryId/:userId",
   "RESULT": "/result/:categoryId/:userId",
-  "IDENTIFICATION": "/identification"
+  "IDENTIFICATION": "/identification",
+  "ADMIN": "/admin",
+  "ADMIN_QUESTIONS": "/admin/questions",
+  "ADMIN_SETTINGS": "/admin/settings",
+  "ADMIN_USERS": "/admin/users",
+  "ADMIN_AUTH": "/admin/auth"
 }

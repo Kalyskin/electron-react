@@ -7,16 +7,36 @@ import {
   QuizAnswerEntity,
   QuizCategory,
   ResultDto,
+  SettingType,
   UpdateQuizEntity,
+  UpdateSettingEntity,
 } from './quiz.entity';
 import { readBase64Image, saveBase64File } from '../utils/file';
 import { USER_IMAGES_PATH } from '../config';
+import { DEFAULT_SETTINGS } from './quiz.contants';
+import { shuffle } from '../utils/array';
 
 export class QuizService {
   constructor(private readonly repository: QuizRepository) {}
 
   findByCategory(category: QuizCategory) {
     return this.repository.findQuestionsByCategory(category);
+  }
+
+  async getByCategory(category: QuizCategory) {
+    let ids = await this.repository.findAllQuestionsIds(category);
+    ids = shuffle(ids);
+    let questionCount = 0;
+    if (category === QuizCategory.PT) {
+      questionCount = await this.getSetting('PD_QUESTION_COUNT');
+    }
+    if (category === QuizCategory.DTC) {
+      questionCount = await this.getSetting('DTC_QUESTION_COUNT');
+    }
+    if (ids.length > questionCount) {
+      ids = ids.slice(0, questionCount);
+    }
+    return this.repository.findQuestionsByIds(ids);
   }
 
   createQuiz(dto: CreateQuizEntity) {
@@ -91,5 +111,30 @@ export class QuizService {
       totalPoint: Math.max(totalPoint, 0),
       percent: Math.max((point / totalPoint) * 100, 0),
     };
+  }
+
+  setSetting(dto: UpdateSettingEntity) {
+    return this.repository.createOrUpdateSetting(dto);
+  }
+
+  async getSetting(name: string) {
+    const setting = await this.repository.findOneSetting(name);
+    if (!setting) {
+      return DEFAULT_SETTINGS[setting.name] || null;
+    }
+    switch (setting.type) {
+      case SettingType.JSON:
+        return JSON.parse(setting.value);
+      case SettingType.NUMBER:
+        return Number(setting.value);
+      case SettingType.STRING:
+        return String(setting.value);
+      default:
+        return DEFAULT_SETTINGS[setting.name] || null;
+    }
+  }
+
+  findSettings() {
+    return this.repository.findSettings();
   }
 }

@@ -9,9 +9,9 @@ import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import React from 'react';
 import { MenuItem, Select } from '@material-ui/core';
 import { useRecoilState } from 'recoil';
-import { QuizCategory } from '../../../electron/quiz/quiz.entity';
-import { categoryTitle } from '../../../utils/category';
-import { quizzesState } from '../../../recoil/atoms/quizzesState';
+import { QuizCategory } from '../../../../../electron/quiz/quiz.entity';
+import { categoryTitle } from '../../../../../utils/category';
+import { quizzesState } from '../../../../../recoil/atoms/quizzesState';
 
 const useToolbarStyles = makeStyles((theme) => ({
   root: {

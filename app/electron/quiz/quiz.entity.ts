@@ -29,6 +29,26 @@ export interface QuizAnswerEntity {
   checkedOptions: string[];
 }
 
+export enum SettingType {
+  NUMBER = 'NUMBER',
+  STRING = 'STRING',
+  JSON = 'JSON',
+}
+
+export interface SettingEntity {
+  name: string;
+  value: string;
+  title: string;
+  type: SettingType;
+}
+
+export interface UpdateSettingEntity {
+  name?: string;
+  value?: string;
+  title?: string;
+  type?: SettingType;
+}
+
 export type CreateQuizEntity = Omit<QuizEntity, 'id'>;
 export type UpdateQuizEntity = Omit<QuizEntity, 'id'>;
 export type CreateUserEntity = Omit<UserEntity, 'id'>;

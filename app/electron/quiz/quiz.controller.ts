@@ -4,6 +4,7 @@ import {
   QuizAnswerEntity,
   QuizCategory,
   UpdateQuizEntity,
+  UpdateSettingEntity,
 } from './quiz.entity';
 import { QuizService } from './quiz.service';
 import { Controller, IpcRequest } from '../libs/decorators';
@@ -15,6 +16,11 @@ export class QuizController {
   @IpcRequest('/find-by-category')
   findByCategory(category: QuizCategory) {
     return this.quizService.findByCategory(category);
+  }
+
+  @IpcRequest('/get-by-category')
+  getByCategory(category: QuizCategory) {
+    return this.quizService.getByCategory(category);
   }
 
   @IpcRequest('/create')
@@ -45,5 +51,36 @@ export class QuizController {
   @IpcRequest('/result')
   result({ userId, category }: { userId: number; category: QuizCategory }) {
     return this.quizService.getResult(userId, category);
+  }
+
+  @IpcRequest('/sav-settings')
+  async saveSettings(settingEntities: UpdateSettingEntity[]) {
+    await Promise.all(
+      settingEntities.map(async (setting) => {
+        await this.quizService.setSetting(setting);
+      })
+    );
+  }
+
+  @IpcRequest('/settings')
+  settings() {
+    return this.quizService.findSettings();
+  }
+
+  @IpcRequest('/category-settings')
+  async getSetting(category: QuizCategory) {
+    if (category === QuizCategory.PT) {
+      return {
+        questionCount: await this.quizService.getSetting('PD_QUESTION_COUNT'),
+        minutes: await this.quizService.getSetting('PD_QUIZ_TIME_MINUTES'),
+      };
+    }
+    if (category === QuizCategory.DTC) {
+      return {
+        questionCount: await this.quizService.getSetting('DTC_QUESTION_COUNT'),
+        minutes: await this.quizService.getSetting('DTC_QUIZ_TIME_MINUTES'),
+      };
+    }
+    return null;
   }
 }

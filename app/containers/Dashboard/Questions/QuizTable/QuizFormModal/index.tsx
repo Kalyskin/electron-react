@@ -19,12 +19,12 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { QuizCategory } from '../../electron/quiz/quiz.entity';
-import { quizState } from '../../recoil/atoms/quizState';
-import { ipcRequest } from '../../utils/ipcRenderer';
-import { quizFormModalState } from '../../recoil/atoms/quizFormModalState';
-import { categoryTitle } from '../../utils/category';
-import { quizzesState } from '../../recoil/atoms/quizzesState';
+import { QuizCategory } from '../../../../../electron/quiz/quiz.entity';
+import { quizState } from '../../../../../recoil/atoms/quizState';
+import { ipcRequest } from '../../../../../utils/ipcRenderer';
+import { quizFormModalState } from '../../../../../recoil/atoms/quizFormModalState';
+import { categoryTitle } from '../../../../../utils/category';
+import { quizzesState } from '../../../../../recoil/atoms/quizzesState';
 
 const useStyles = makeStyles((theme) => {
   return {

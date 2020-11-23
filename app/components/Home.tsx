@@ -75,7 +75,7 @@ const Home = () => {
     setKpp(event.target.value);
   };
   const handleSettingsClick = () => {
-    navigate(routes.QUIZ_ADMIN);
+    navigate(routes.ADMIN);
   };
   const handleInputFullName = (e: any) => {
     setFullName(e.target.value);

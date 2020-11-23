@@ -6,7 +6,9 @@ import {
   QuizCategory,
   QuizEntity,
   QuizOption,
+  SettingEntity,
   UpdateQuizEntity,
+  UpdateSettingEntity,
   UserEntity,
 } from './quiz.entity';
 
@@ -17,7 +19,18 @@ export class QuizRepository {
 
   private readonly ANSWER_TABLE_NAME = 'answer';
 
+  private readonly SETTING_TABLE_NAME = 'setting';
+
   constructor(private readonly db: Knex) {}
+
+  async findAllQuestionsIds(category: QuizCategory): Promise<number[]> {
+    const data = await this.db(this.QUIZ_TABLE_NAME)
+      .where('category', category)
+      .select('id');
+    return data.map((item) => {
+      return Number(item.id);
+    });
+  }
 
   async findQuestionsByCategory(category: QuizCategory): Promise<QuizEntity[]> {
     const data = await this.db(this.QUIZ_TABLE_NAME).where(
@@ -101,5 +114,34 @@ export class QuizRepository {
 
   findAnswersUserById(userId: number): Promise<QuizAnswerEntity[]> {
     return this.db(this.ANSWER_TABLE_NAME).where('userId', userId);
+  }
+
+  findOneSetting(name: string): Promise<SettingEntity> {
+    return this.db(this.SETTING_TABLE_NAME)
+      .where('name', name)
+      .select('*')
+      .first();
+  }
+
+  async findSettings(): Promise<SettingEntity[]> {
+    const data = await this.db(this.SETTING_TABLE_NAME).select('*');
+    return data.map(({ type, name, title, value }) => ({
+      type,
+      name,
+      title,
+      value,
+    }));
+  }
+
+  async createOrUpdateSetting(
+    dto: UpdateSettingEntity
+  ): Promise<QuizAnswerEntity[]> {
+    const setting = await this.findOneSetting(dto.name);
+    if (setting) {
+      return this.db(this.SETTING_TABLE_NAME)
+        .where('name', dto.name)
+        .update(dto);
+    }
+    return this.db(this.SETTING_TABLE_NAME).insert(dto);
   }
 }

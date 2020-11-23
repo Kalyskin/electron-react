@@ -14,6 +14,7 @@ import { useRouter } from '../hooks/router';
 import { categoryTitle } from '../utils/category';
 import { currentSessionState } from '../recoil/selectors/questionsState';
 import QuizItem from '../components/QuizItem';
+import { useTimer } from '../hooks/timer';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -21,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
+    background: theme.palette.background.default,
   },
   appBar: {
     height: '54px',
@@ -37,11 +39,18 @@ const useStyles = makeStyles((theme) => ({
   bottomNav: {
     paddingTop: theme.spacing(2),
   },
+  toolbar: {
+    justifyContent: 'space-between',
+  },
+  redTime: {
+    color: 'red',
+  },
 }));
 
 export default function QuizPage() {
   const classes = useStyles();
   const { goBack } = useRouter();
+  const { fullTime, seconds } = useTimer();
   const { categoryId, userId } = useParams<{
     categoryId: QuizCategory;
     userId: string;
@@ -58,7 +67,7 @@ export default function QuizPage() {
   return (
     <div className={classes.root}>
       <AppBar position="static" className={classes.appBar}>
-        <Toolbar variant="dense">
+        <Toolbar variant="dense" className={classes.toolbar}>
           <IconButton
             onClick={() => goBack()}
             edge="start"
@@ -70,6 +79,13 @@ export default function QuizPage() {
           </IconButton>
           <Typography variant="h6" color="inherit">
             {categoryTitle(categoryId)}
+          </Typography>
+          <Typography
+            className={seconds < 30 ? classes.redTime : undefined}
+            variant="h6"
+            color="inherit"
+          >
+            {fullTime}
           </Typography>
         </Toolbar>
       </AppBar>

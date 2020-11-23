@@ -18,10 +18,16 @@ const db: Knex = Knex({
   useNullAsDefault: true,
 });
 
-db.migrate.latest({
-  database: 'migrations',
-  directory: path.join(RESOURCES_PATH, 'migrations'),
-});
+db.migrate
+  .latest({
+    database: 'migrations',
+    directory: path.join(RESOURCES_PATH, 'migrations'),
+  })
+  .then(() =>
+    db.seed.run({
+      directory: path.join(RESOURCES_PATH, 'seeds'),
+    })
+  );
 
 export default class AppUpdater {
   constructor() {
@@ -84,6 +90,7 @@ const createWindow = async () => {
             preload: path.join(__dirname, 'dist/renderer.prod.js'),
           },
   });
+  mainWindow.maximize();
 
   mainWindow.loadURL(`file://${__dirname}/app.html`);
 

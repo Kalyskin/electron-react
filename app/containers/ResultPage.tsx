@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
   },
   buttons: {
-    width: 350,
+    width: 400,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'space-around',
