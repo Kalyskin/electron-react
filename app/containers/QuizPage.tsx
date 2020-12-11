@@ -8,11 +8,14 @@ import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useParams } from 'react-router';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { QuizCategory } from '../electron/quiz/quiz.entity';
 import { useRouter } from '../hooks/router';
 import { categoryTitle } from '../utils/category';
-import { currentSessionState } from '../recoil/selectors/questionsState';
+import {
+  currentSessionState,
+  quizCountAndCurrentState,
+} from '../recoil/selectors/questionsState';
 import QuizItem from '../components/QuizItem';
 import { useTimer } from '../hooks/timer';
 
@@ -47,6 +50,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function QuizCountAndCurrentNumber() {
+  const { currentQuestionNumber, questionsCount } = useRecoilValue(
+    quizCountAndCurrentState
+  );
+  return (
+    <Typography variant="h6" color="inherit">
+      {`Вопрос ${questionsCount} из ${currentQuestionNumber}`}
+    </Typography>
+  );
+}
+
 export default function QuizPage() {
   const classes = useStyles();
   const { goBack } = useRouter();
@@ -80,12 +94,15 @@ export default function QuizPage() {
           <Typography variant="h6" color="inherit">
             {categoryTitle(categoryId)}
           </Typography>
+          <React.Suspense fallback={null}>
+            <QuizCountAndCurrentNumber />
+          </React.Suspense>
           <Typography
             className={seconds < 30 ? classes.redTime : undefined}
             variant="h6"
             color="inherit"
           >
-            {fullTime}
+            {`Осталось до конца: ${fullTime}`}
           </Typography>
         </Toolbar>
       </AppBar>

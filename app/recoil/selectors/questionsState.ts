@@ -34,6 +34,22 @@ export const questionsState = selector<QuizEntity[]>({
   },
 });
 
+export const quizCountAndCurrentState = selector<{
+  questionsCount: number;
+  currentQuestionNumber: number;
+}>({
+  key: 'quizCountAndCurrentState',
+  get: async ({ get }) => {
+    const questions = get(questionsState);
+    const currentQuestionIndex = get(currentQuestionIndexState);
+
+    return {
+      questionsCount: questions.length,
+      currentQuestionNumber: currentQuestionIndex + 1,
+    };
+  },
+});
+
 interface QuizSettingsState {
   questionCount: number;
   minutes: number;

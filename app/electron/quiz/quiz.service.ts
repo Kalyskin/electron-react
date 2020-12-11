@@ -98,8 +98,12 @@ export class QuizService {
         return sum;
       }, 0);
       const userPoint = Math.max(correct - incorrect, 0);
-      point += userPoint / optionPoint;
+      if (optionPoint > 0 && userPoint > 0) {
+        point += userPoint / optionPoint;
+      }
     });
+
+    console.log({ point, totalPoint });
 
     return {
       user: {

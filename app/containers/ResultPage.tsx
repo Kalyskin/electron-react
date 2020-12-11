@@ -23,6 +23,9 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     padding: theme.spacing(2),
   },
+  userinfo: {
+    margin: theme.spacing(1, 1, 1),
+  },
   buttons: {
     width: 400,
     display: 'flex',
@@ -73,67 +76,102 @@ export default function ResultPage() {
     );
 
     doc.addSection({
-      headers: {
-        default: new docx.Header({
-          children: [
-            new docx.Paragraph({
-              alignment: AlignmentType.CENTER,
-              text: 'ТЕСТИРОВАНИЕ',
-              heading: docx.HeadingLevel.HEADING_1,
-            }),
-            new docx.Paragraph({
-              alignment: AlignmentType.RIGHT,
-              children: [image1],
-            }),
-            new docx.Paragraph({
-              alignment: AlignmentType.CENTER,
-              children: [
-                new docx.Paragraph({
-                  alignment: AlignmentType.LEFT,
-                  text: resultDto.user.rank,
-                  heading: docx.HeadingLevel.HEADING_3,
-                }),
-                new docx.Paragraph({
-                  alignment: AlignmentType.LEFT,
-                  text: resultDto.user.full_name,
-                  heading: docx.HeadingLevel.HEADING_3,
-                }),
-                new docx.Paragraph({
-                  alignment: AlignmentType.LEFT,
-                  text: resultDto.user.kpp,
-                  heading: docx.HeadingLevel.HEADING_3,
-                }),
-              ],
-            }),
-            new docx.Paragraph({
-              alignment: AlignmentType.CENTER,
-              text: 'РЕЗУЛЬТАТЫ ТЕСТА',
-              heading: docx.HeadingLevel.HEADING_1,
-            }),
-            new docx.Paragraph({
-              alignment: AlignmentType.CENTER,
-              text: `Вы набрали: ${resultDto.percent} процентов`,
-            }),
-          ],
+      properties: {},
+      children: [
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          text: 'ТЕСТИРОВАНИЕ',
+          heading: docx.HeadingLevel.HEADING_1,
         }),
-      },
-      footers: {
-        default: new docx.Footer({
-          children: [
-            new docx.Paragraph({
-              alignment: AlignmentType.RIGHT,
-              text: `Дата время секунда`,
-            }),
-            new docx.Paragraph({}),
-            new docx.Paragraph({
-              alignment: AlignmentType.CENTER,
-              text: `Ознакомлен (-а) с результатами теста                                ____________________`,
-            }),
-          ],
+        new docx.Paragraph({
+          alignment: AlignmentType.RIGHT,
+          children: [image1],
         }),
-      },
-      children: [],
+        new docx.Paragraph({
+          alignment: AlignmentType.LEFT,
+          text: resultDto.user.rank,
+          heading: docx.HeadingLevel.HEADING_3,
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.LEFT,
+          text: resultDto.user.full_name,
+          heading: docx.HeadingLevel.HEADING_3,
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.LEFT,
+          text: resultDto.user.kpp,
+          heading: docx.HeadingLevel.HEADING_3,
+        }),
+        new docx.Paragraph({
+          text: '\n',
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          text: 'РЕЗУЛЬТАТЫ ТЕСТА',
+          heading: docx.HeadingLevel.HEADING_1,
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          text: `Вы набрали: ${resultDto.percent} процентов`,
+        }).addRunToFront(new docx.Run({}).break()),
+        new docx.Paragraph({
+          alignment: AlignmentType.RIGHT,
+          text: `Дата время секунда`,
+        }),
+        new docx.Paragraph({}),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          text: `Ознакомлен (-а) с результатами теста                                ____________________`,
+        }).addRunToFront(new docx.Run({}).break()),
+        new docx.Paragraph({}).addRunToFront(
+          new docx.Run({}).break().break().break().break().break().break()
+        ),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          text: 'ТЕСТИРОВАНИЕ',
+          heading: docx.HeadingLevel.HEADING_1,
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.RIGHT,
+          children: [image1],
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.LEFT,
+          text: resultDto.user.rank,
+          heading: docx.HeadingLevel.HEADING_3,
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.LEFT,
+          text: resultDto.user.full_name,
+          heading: docx.HeadingLevel.HEADING_3,
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.LEFT,
+          text: resultDto.user.kpp,
+          heading: docx.HeadingLevel.HEADING_3,
+        }).addRunToFront(new docx.Run({}).break()),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          text: 'РЕЗУЛЬТАТЫ ТЕСТА',
+          heading: docx.HeadingLevel.HEADING_1,
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          text: `Вы набрали: ${resultDto.percent} процентов`,
+        }).addRunToFront(new docx.Run({}).break()),
+
+        new docx.Paragraph({
+          alignment: AlignmentType.RIGHT,
+          text: `Дата время секунда`,
+        }),
+        new docx.Paragraph({}),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          text: `Ознакомлен (-а) с результатами теста                                ____________________`,
+        }),
+      ],
     });
+
     docx.Packer.toBlob(doc)
       .then((blob) => {
         saveAs(blob, 'example.docx');
@@ -147,20 +185,25 @@ export default function ResultPage() {
         {resultDto ? (
           <Paper className={classes.paper}>
             <h1>Результаты тестирования:</h1>
-            <h4>{categoryTitle(resultDto.category)}</h4>
-            <h4>
-              Пользователь:
-              {resultDto.user.full_name}
+            <h4 className={classes.userinfo}>
+              {categoryTitle(resultDto.category)}
             </h4>
-            <h4>
-              максимальный балл:
-              {resultDto.totalPoint}
+            <h4 className={classes.userinfo}>
+              {`ФИО: ${resultDto.user.full_name}`}
             </h4>
-            <h4>
-              ваш балл:
-              {resultDto.point}
+            <h4 className={classes.userinfo}>
+              {`Звания: ${resultDto.user.rank}`}
             </h4>
-            <h2>{`Вы набрали: ${resultDto.percent} процентов`}</h2>
+            <h4 className={classes.userinfo}>{`КПП: ${resultDto.user.kpp}`}</h4>
+            <h4 className={classes.userinfo}>
+              {`максимальный балл: ${resultDto.totalPoint}`}
+            </h4>
+            <h4 className={classes.userinfo}>
+              {`ваш балл: ${resultDto.point}`}
+            </h4>
+            <h2 className={classes.userinfo}>
+              {`Вы набрали: ${resultDto.percent} процентов`}
+            </h2>
             <div className={classes.buttons}>
               <Button
                 variant="contained"

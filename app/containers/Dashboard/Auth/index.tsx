@@ -11,6 +11,7 @@ import { useRecoilState } from 'recoil';
 import { Redirect } from 'react-router';
 import { authState } from '../../../recoil/atoms/authState';
 import routes from '../../../constants/routes.json';
+import { useRouter } from '../../../hooks/router';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -30,10 +31,14 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  backButton: {
+    margin: theme.spacing(0, 0, 2),
+  },
 }));
 
 export default function AuthPage() {
   const classes = useStyles();
+  const { navigate } = useRouter();
   const [auth, setAuth] = useRecoilState(authState);
   const [errorMessage, setErrorMessage] = useState('');
   const [password, setPassword] = useState('');
@@ -86,6 +91,15 @@ export default function AuthPage() {
             className={classes.submit}
           >
             Войти
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            color="default"
+            className={classes.backButton}
+            onClick={() => navigate(routes.HOME)}
+          >
+            Назад
           </Button>
         </form>
       </div>
