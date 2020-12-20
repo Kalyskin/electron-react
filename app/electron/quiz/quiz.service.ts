@@ -80,6 +80,7 @@ export class QuizService {
     }, {});
 
     let point = 0;
+    let answersCount = 0;
     const totalPoint = questions.length;
 
     questions.forEach((q) => {
@@ -100,10 +101,11 @@ export class QuizService {
       const userPoint = Math.max(correct - incorrect, 0);
       if (optionPoint > 0 && userPoint > 0) {
         point += userPoint / optionPoint;
+        if (userPoint / optionPoint > 0) {
+          answersCount += 1;
+        }
       }
     });
-
-    console.log({ point, totalPoint });
 
     return {
       user: {
@@ -114,6 +116,8 @@ export class QuizService {
       point: Math.max(point, 0),
       totalPoint: Math.max(totalPoint, 0),
       percent: Math.max((point / totalPoint) * 100, 0),
+      questionCount: questions.length,
+      answersCount,
     };
   }
 

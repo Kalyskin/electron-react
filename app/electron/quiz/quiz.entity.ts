@@ -61,6 +61,8 @@ export interface CreateUserDto {
 }
 
 export interface ResultDto {
+  questionCount: number;
+  answersCount: number;
   user: UserEntity;
   category: QuizCategory;
   point: number;

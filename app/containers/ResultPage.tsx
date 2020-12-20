@@ -16,6 +16,10 @@ import { ipcRequest } from '../utils/ipcRenderer';
 import routes from '../constants/routes.json';
 // import routes from '../constants/routes.json';
 
+const space = (count: number) => {
+  return ' '.repeat(count);
+};
+
 const useStyles = makeStyles((theme) => ({
   paper: {
     display: 'flex',
@@ -76,12 +80,14 @@ export default function ResultPage() {
     );
 
     doc.addSection({
-      properties: {},
+      properties: {
+        top: 20,
+      },
       children: [
         new docx.Paragraph({
           alignment: AlignmentType.CENTER,
           text: 'ТЕСТИРОВАНИЕ',
-          heading: docx.HeadingLevel.HEADING_1,
+          heading: docx.HeadingLevel.HEADING_2,
         }),
         new docx.Paragraph({
           alignment: AlignmentType.RIGHT,
@@ -89,17 +95,17 @@ export default function ResultPage() {
         }),
         new docx.Paragraph({
           alignment: AlignmentType.LEFT,
-          text: resultDto.user.rank,
+          text: resultDto.user.rank.toUpperCase(),
           heading: docx.HeadingLevel.HEADING_3,
         }),
         new docx.Paragraph({
           alignment: AlignmentType.LEFT,
-          text: resultDto.user.full_name,
+          text: resultDto.user.full_name.toUpperCase(),
           heading: docx.HeadingLevel.HEADING_3,
         }),
         new docx.Paragraph({
           alignment: AlignmentType.LEFT,
-          text: resultDto.user.kpp,
+          text: resultDto.user.kpp.toUpperCase(),
           heading: docx.HeadingLevel.HEADING_3,
         }),
         new docx.Paragraph({
@@ -108,28 +114,78 @@ export default function ResultPage() {
         new docx.Paragraph({
           alignment: AlignmentType.CENTER,
           text: 'РЕЗУЛЬТАТЫ ТЕСТА',
-          heading: docx.HeadingLevel.HEADING_1,
+          heading: docx.HeadingLevel.HEADING_2,
         }),
         new docx.Paragraph({
           alignment: AlignmentType.CENTER,
-          text: `Вы набрали: ${resultDto.percent} процентов`,
-        }).addRunToFront(new docx.Run({}).break()),
-        new docx.Paragraph({
-          alignment: AlignmentType.RIGHT,
-          text: `Дата время секунда`,
+          children: [],
         }),
-        new docx.Paragraph({}),
         new docx.Paragraph({
           alignment: AlignmentType.CENTER,
-          text: `Ознакомлен (-а) с результатами теста                                ____________________`,
+          children: [
+            new docx.TextRun({
+              text: `Вы ответили на ${resultDto.answersCount} вопросов из ${resultDto.questionCount}`,
+              bold: true,
+              size: 25,
+            }),
+          ],
+        }),
+
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new docx.TextRun({
+              text: `${resultDto.percent.toFixed(1)} % (процентов)`,
+              bold: true,
+              size: 25,
+            }),
+          ],
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new docx.TextRun({
+              text: `${resultDto.point} баллов`,
+              bold: true,
+              size: 25,
+            }),
+          ],
+        }),
+
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new docx.TextRun({
+              text: `ИДЕНТИФИКАЦИЯ _________________`,
+              bold: true,
+              size: 25,
+            }).break(),
+          ],
         }).addRunToFront(new docx.Run({}).break()),
-        new docx.Paragraph({}).addRunToFront(
-          new docx.Run({}).break().break().break().break().break().break()
-        ),
+
+        new docx.Paragraph({
+          children: [
+            new docx.TextRun({
+              text: `Ознакомлен (-а) с результатами теста ${space(
+                60
+              )}__________`,
+              size: 24,
+            }).break(),
+          ],
+        }),
+        new docx.Paragraph({
+          children: [
+            new docx.TextRun({
+              text: `${space(155)}Подпись`,
+              size: 20,
+            }),
+          ],
+        }).addRunToFront(new docx.Run({}).break()),
+
         new docx.Paragraph({
           alignment: AlignmentType.CENTER,
           text: 'ТЕСТИРОВАНИЕ',
-          heading: docx.HeadingLevel.HEADING_1,
+          heading: docx.HeadingLevel.HEADING_2,
         }),
         new docx.Paragraph({
           alignment: AlignmentType.RIGHT,
@@ -137,38 +193,93 @@ export default function ResultPage() {
         }),
         new docx.Paragraph({
           alignment: AlignmentType.LEFT,
-          text: resultDto.user.rank,
+          text: resultDto.user.rank.toUpperCase(),
           heading: docx.HeadingLevel.HEADING_3,
         }),
         new docx.Paragraph({
           alignment: AlignmentType.LEFT,
-          text: resultDto.user.full_name,
+          text: resultDto.user.full_name.toUpperCase(),
           heading: docx.HeadingLevel.HEADING_3,
         }),
         new docx.Paragraph({
           alignment: AlignmentType.LEFT,
-          text: resultDto.user.kpp,
+          text: resultDto.user.kpp.toUpperCase(),
           heading: docx.HeadingLevel.HEADING_3,
-        }).addRunToFront(new docx.Run({}).break()),
+        }),
+        new docx.Paragraph({
+          text: '\n',
+        }),
         new docx.Paragraph({
           alignment: AlignmentType.CENTER,
           text: 'РЕЗУЛЬТАТЫ ТЕСТА',
-          heading: docx.HeadingLevel.HEADING_1,
+          heading: docx.HeadingLevel.HEADING_2,
+        }).addRunToFront(new docx.Run({}).break()),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [],
         }),
         new docx.Paragraph({
           alignment: AlignmentType.CENTER,
-          text: `Вы набрали: ${resultDto.percent} процентов`,
-        }).addRunToFront(new docx.Run({}).break()),
+          children: [
+            new docx.TextRun({
+              text: `Вы ответили на ${resultDto.answersCount} вопросов из ${resultDto.questionCount}`,
+              bold: true,
+              size: 25,
+            }),
+          ],
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new docx.TextRun({
+              text: `${resultDto.percent.toFixed(1)} % (процентов)`,
+              bold: true,
+              size: 25,
+            }),
+          ],
+        }),
+        new docx.Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new docx.TextRun({
+              text: `${resultDto.point} баллов`,
+              bold: true,
+              size: 25,
+            }),
+          ],
+        }),
 
         new docx.Paragraph({
-          alignment: AlignmentType.RIGHT,
-          text: `Дата время секунда`,
-        }),
-        new docx.Paragraph({}),
-        new docx.Paragraph({
           alignment: AlignmentType.CENTER,
-          text: `Ознакомлен (-а) с результатами теста                                ____________________`,
+          children: [
+            new docx.TextRun({
+              text: `ИДЕНТИФИКАЦИЯ _________________`,
+              bold: true,
+              size: 25,
+            }).break(),
+          ],
+        })
+          .addRunToFront(new docx.Run({}).break())
+          .addRunToFront(new docx.Run({}).break()),
+
+        new docx.Paragraph({
+          children: [
+            new docx.TextRun({
+              text: `Ознакомлен (-а) с результатами теста ${space(
+                60
+              )}__________`,
+              size: 24,
+            }).break(),
+          ],
         }),
+        new docx.Paragraph({
+          children: [
+            new docx.TextRun({
+              text: `${space(155)}Подпись`,
+              size: 20,
+            }),
+          ],
+        }).addRunToFront(new docx.Run({}).break()),
       ],
     });
 
@@ -202,7 +313,7 @@ export default function ResultPage() {
               {`ваш балл: ${resultDto.point}`}
             </h4>
             <h2 className={classes.userinfo}>
-              {`Вы набрали: ${resultDto.percent} процентов`}
+              {`Вы набрали: ${resultDto.percent.toFixed(1)} процентов`}
             </h2>
             <div className={classes.buttons}>
               <Button
